@@ -1,7 +1,5 @@
 # temporary file that made by this script
-*.~base
-*.~sorted
-*.~optimized
+/db/*.~*
 
 # source file
 /src
