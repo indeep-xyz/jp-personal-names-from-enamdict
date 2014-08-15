@@ -6,10 +6,11 @@ use 5.0080001;
 use strict;
 use warnings;
 use utf8;
+
 use Data::Dumper;
 use List::Util qw/shuffle/;
-
 use Encode;
+
 binmode(STDOUT, ':utf8');
 binmode(STDIN, ':utf8');
 
@@ -82,10 +83,8 @@ sub _select_random{
 
   my @ret;
 
-  # initialize count array
-  # - [0] = count of YOMI and FLAGS and NAME
-  # - [1] = count of YOMI and FLAGS
-  #my $size = $class->_load_count_file("${dbpath}.count");
+  # - - - - - - - - -
+  # main
 
   if($limit > $rec_count){
 
@@ -276,98 +275,6 @@ sub _regex_wrapper { # {{{5
 
   return $ret;
 } # }}}5
-
-# - - - - - - - - - - - - - - - - - - - - -
-# random cache
-
-# = =
-#
-# args
-# $dbpath ... database path for random cache
-# $limit  ... number for load records
-sub _load_random_cache { # {{{5
-
-  my $class  = shift;
-  my $dbpath = shift;
-  my $limit  = shift;
-
-  my @ret    = ();
-  my @cache  = ();
-
-  if(-f $dbpath){
-
-    open(DB, '<:utf8', $dbpath) or die("read error: $!");
-
-    eval{
-      while (my $line = <DB>){
-
-        if(scalar(@ret) >= $limit){
-
-          push(@ret, $line);
-        }
-        else{
-          push(@cache, $line);
-        }
-
-      }
-    };
-    close(DB);
-
-    if (scalar(@cache) > 0 ){
-      $class->_write_random_cache($dbpath, \@cache);
-    }
-  }
-
-  return \@ret;
-} # }}}5
-
-# = =
-#
-# args
-# $dbpath ... database path for random cache
-# $records ... refference for array
-sub _write_random_cache {
-
-  my $class   = shift;
-  my $dbpath  = shift;
-  my $records = shift;
-
-  open(DB, '>:utf8', $dbpath) or die("write error: $!");
-  eval{
-    foreach my $record (@$records){
-
-      printf DB "%s\n", $record;
-    }
-  };
-
-  close(DB);
-  
-}
-
-# - - - - - - - - - - - - - - - - - - - - -
-# config
-
-sub _load_count_file {
-
-  my $class = shift;
-  my $path  = shift;
-  my @ret   = ();
-
-  # open file handler
-  open(FILE, '<:utf8', $path) or die("write error: $!");
-
-  eval {
-    while(my $line = <FILE>){
-      chomp($line);
-      push(@ret, $line);
-    }
-  };
-
-  # close file handler
-  close(FILE);
-
-  return \@ret;
-}
 
 # - - - - - - - - - - - - - - - - - - - - -
 # other
