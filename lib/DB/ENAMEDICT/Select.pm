@@ -47,12 +47,7 @@ sub select {
       ? $class->_select_normal($dbpath, $q)
       : $class->_select_random($dbpath, $q);
 
-  printf "%d\n", $q->{'limit'};
-  printf "%d\n", defined($q->{'limit'});
-  printf "%d\n", defined($q->{'limt'});
-
-  printf "%s\n", scalar(@$result);
-
+  # result
   for (my $i = 0; $i < scalar(@$result); $i++) {
     printf "%s\n", @$result[$i];
   }
@@ -69,7 +64,7 @@ sub _select_normal{
   my $q       = shift;
 
   my $limit   = $q->{'limit'};
-  my $records = $class->_load_database($dbpath, $q, 1);
+  my $records = $class->_load_database($dbpath, $q);
   my @ret     = splice(@$records, 1, $limit);
 
   return \@ret;
@@ -77,21 +72,75 @@ sub _select_normal{
 
 sub _select_random{
 
-  my $class   = shift;
-  my $dbpath  = shift;
-  my $q       = shift;
+  my $class      = shift;
+  my $dbpath     = shift;
+  my $q          = shift;
 
-  my $limit   = $q->{'limit'};
-  my $cnt     = 0;
-  my $records = $class->_load_database($dbpath, $q, 1);
+  my $limit      = $q->{'limit'};
+  my $records    = $class->_load_database($dbpath, $q, 1);
+  my $rec_count  = scalar(@$records);
+
+  my @ret;
 
   # initialize count array
   # - [0] = count of YOMI and FLAGS and NAME
   # - [1] = count of YOMI and FLAGS
   #my $size = $class->_load_count_file("${dbpath}.count");
 
-  my @shuffle = shuffle(@$records);
-  my @ret     = splice(@shuffle, 1, $limit);
+  if($limit > $rec_count){
+
+    @ret = shuffle(@$records);
+  }
+  elsif($limit > $rec_count / 2){
+    my @shuffle = shuffle(@$records);
+    @ret        = splice(@shuffle, 1, $limit);
+  }
+  else{
+
+    $records = $class->_pickup_random($records, $limit);
+    @ret     = @$records;
+  }
+
+  return \@ret;
+}
+
+# = =
+# pickup some items from array at random
+#
+# args
+# $records ... array as search target
+# $limit   ... needle
+sub _pickup_random {
+
+  my $class       = shift;
+  my $records     = shift;
+  my $limit       = shift;
+
+  my @ret         = ();
+  my @rnd_log     = ();
+  my $records_cnt = scalar(@$records);
+
+  main: while (1) {
+
+    # create rand
+    my $rnd = int(rand($records_cnt));
+
+    # check rand log
+    foreach my $rnd_old (@rnd_log){
+
+      # if exists
+      # - next the while loop
+      next main if ($rnd_old == $rnd);
+    }
+
+    # push
+    # - rand log, returner
+    push(@rnd_log, $rnd);
+    push(@ret, @$records[$rnd]);
+
+    # if returner's length is over the limit argument
+    last if (scalar(@ret) >= $limit);
+  }
 
   return \@ret;
 }
@@ -109,7 +158,7 @@ sub _select_random{
 #
 # returner
 #   [ [NAME YOMI], [NAME YOMI], [NAME YOMI], ... ]
-sub _load_database {
+sub _load_database { # {{{5
 
   my $class  = shift;
   my $dbpath = shift;
@@ -120,7 +169,7 @@ sub _load_database {
   my @ret    = ();
 
   # open file handler
-  open(DB, '<:utf8', $dbpath) or die("write error: $!");
+  open(DB, '<:utf8', $dbpath) or die("read error: $!");
   eval {
     while(my $record = <DB>){
 
@@ -146,14 +195,14 @@ sub _load_database {
   close(DB);
 
   return \@ret;
-}
+} # }}}5
 
 # = =
-#
+# parse record from source data
 #
 # returner
 #   [ [NAME YOMI], [NAME YOMI], [NAME YOMI], ... ]
-sub _parse_record {
+sub _parse_record { # {{{5
 
   my $class  = shift;
   my $record = shift;
@@ -200,10 +249,18 @@ sub _parse_record {
   }
 
   return \@ret;
-}
+} # }}}5
 
 # = =
+# regex wrapper
 #
+# args
+# $str   ... text
+# $regex ... regex
+#
+# returner
+#   1 ... match or $regex string is none
+#   0 ... no match
 sub _regex_wrapper { # {{{5
 
   my $class        = shift;
@@ -219,6 +276,73 @@ sub _regex_wrapper { # {{{5
 
   return $ret;
 } # }}}5
+
+# - - - - - - - - - - - - - - - - - - - - -
+# random cache
+
+# = =
+#
+# args
+# $dbpath ... database path for random cache
+# $limit  ... number for load records
+sub _load_random_cache { # {{{5
+
+  my $class  = shift;
+  my $dbpath = shift;
+  my $limit  = shift;
+
+  my @ret    = ();
+  my @cache  = ();
+
+  if(-f $dbpath){
+
+    open(DB, '<:utf8', $dbpath) or die("read error: $!");
+
+    eval{
+      while (my $line = <DB>){
+
+        if(scalar(@ret) >= $limit){
+
+          push(@ret, $line);
+        }
+        else{
+          push(@cache, $line);
+        }
+
+      }
+    };
+    close(DB);
+
+    if (scalar(@cache) > 0 ){
+      $class->_write_random_cache($dbpath, \@cache);
+    }
+  }
+
+  return \@ret;
+} # }}}5
+
+# = =
+#
+# args
+# $dbpath ... database path for random cache
+# $records ... refference for array
+sub _write_random_cache {
+
+  my $class   = shift;
+  my $dbpath  = shift;
+  my $records = shift;
+
+  open(DB, '>:utf8', $dbpath) or die("write error: $!");
+  eval{
+    foreach my $record (@$records){
+
+      printf DB "%s\n", $record;
+    }
+  };
+
+  close(DB);
+  
+}
 
 # - - - - - - - - - - - - - - - - - - - - -
 # config
@@ -299,6 +423,9 @@ sub _init_query {
   # - follow in the qw/.../
   for my $idx (qw/yomi_regex name_regex/){
     $q->{$idx} = defined($q->{$idx}) ? $q->{$idx} : '';
+    if (! utf8::is_utf8($q->{$idx})) {
+      $q->{$idx} = Encode::decode('utf8', $q->{$idx});
+    }
   }
 
   # flags
@@ -318,8 +445,6 @@ sub _init_query {
       $q->{'flags'} .= '.';
     }
   }
-
-  printf "%s@", $q->{'flags'};
 }
 
 1;
