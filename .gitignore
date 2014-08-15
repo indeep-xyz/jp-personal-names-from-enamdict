@@ -1,0 +1,7 @@
+# temporary file that made by this script
+*.~base
+*.~sorted
+*.~optimized
+
+# source file
+/src
