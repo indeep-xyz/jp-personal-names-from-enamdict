@@ -358,7 +358,7 @@ sub _create_flag_string { # {{{5
   $flag[0] = ($name =~ /\p{InHalfwidthAndFullwidthForms}/) ? 1 : 0;
 
   # Hiragana
-  $flag[1] = ($name =~ /\p{InHiragana}/) ? 1 : 0;
+  $flag[1] = ($name =~ /[ー\p{InHiragana}]/) ? 1 : 0;
 
   # Katakana
   $flag[2] = ($name =~ /\p{InKatakana}/) ? 1 : 0;
