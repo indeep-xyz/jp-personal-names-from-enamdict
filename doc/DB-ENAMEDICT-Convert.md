@@ -28,7 +28,7 @@ path for database.
 
 ### FilterType
 
-refference of ARRAY.
+reference of ARRAY.
 
 for data filtering. 
 

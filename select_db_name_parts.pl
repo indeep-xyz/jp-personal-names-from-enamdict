@@ -35,17 +35,17 @@ EOT
 my %opts = ();
 
 # getopts
+# - f ... database flags ([.01]{5})
 # - l ... limit
-# - r ... random flag
-# - y ... yomi regex
 # - n ... name regex
-# - f ... database flags ([.01]{4})
-getopts ("l:ry:n:f:", \%opts);
+# - y ... yomi regex
+# - r ... random flag
+getopts ("f:l:n:y:r", \%opts);
 
 # initialize
+$opts{'f'} ||= '.....';
 $opts{'l'} ||= 1;
 $opts{'r'} ||= 0;
-$opts{'f'} ||= '....';
 
 # - - - - - - - - - - - - - - - - - - -
 # main
@@ -61,11 +61,16 @@ my %query = (
   flag_hiragana => substr($opts{'f'}, 1, 1),
   flag_katakana => substr($opts{'f'}, 2, 1),
   flag_kanji    => substr($opts{'f'}, 3, 1),
+  flag_chouon   => substr($opts{'f'}, 4, 1),
 );
 
 $query{'yomi_regex'} = $opts{'y'} if defined($opts{'y'});
 $query{'name_regex'} = $opts{'n'} if defined($opts{'n'});
 
 # run
-DB::ENAMEDICT::Select->select($dbpath, \%query);
+my $result = DB::ENAMEDICT::Select->select($dbpath, \%query);
 
+# print $result
+for (my $i = 0; $i < scalar(@$result); $i++) {
+  printf "%s\n", @$result[$i];
+}

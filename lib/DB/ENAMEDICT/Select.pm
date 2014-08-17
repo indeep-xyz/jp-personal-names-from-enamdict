@@ -51,9 +51,7 @@ sub select {
       : $class->_select_random($dbpath, $q);
 
   # result
-  for (my $i = 0; $i < scalar(@$result); $i++) {
-    printf "%s\n", @$result[$i];
-  }
+  return $result;
 }
 
 # - - - - - - - - - - - - - - - - - - - - -
@@ -340,7 +338,7 @@ sub _init_query {
   # flags
   # - use as regex
   $q->{'flags'} = '';
-  for my $idx (qw/flag_alnum flag_hiragana flag_katakana flag_kanji/){
+  for my $idx (qw/flag_alnum flag_hiragana flag_katakana flag_kanji flag_chouon/){
 
     # check flag property
     if(defined($q->{$idx}) && $q->{$idx} =~ m/^([01])$/){
