@@ -14,6 +14,8 @@ use Encode;
 binmode(STDOUT, ':utf8');
 binmode(STDIN, ':utf8');
 
+our $VERSION = "1.01";
+
 # = =
 # initialize method
 #

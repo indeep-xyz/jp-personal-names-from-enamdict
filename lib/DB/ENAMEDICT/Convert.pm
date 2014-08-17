@@ -10,6 +10,8 @@ use Data::Dumper;
 
 binmode(STDOUT, ':utf8');
 
+our $VERSION = "1.01";
+
 # = =
 # initialize method
 #
@@ -40,6 +42,7 @@ sub create {
   my $self              = shift;
   my $output_path       = shift;
   my $filter_type       = shift;
+  my $yomi_type         = shift;
   my $output_count_path = $output_path . '.count';
 
   # temp paths
@@ -53,7 +56,7 @@ sub create {
   $self->_guard_convert($output_path, $filter_type);
 
   # create base
-  $self->_create_base($base_temp, $filter_type);
+  $self->_create_base($base_temp, $filter_type, $yomi_type);
 
   # sort
   `sort -o "$sort_temp" "$base_temp"`;
@@ -82,11 +85,12 @@ sub create {
 # create base file
 sub _create_base { # {{{5
 
-  my $self           = shift;
-  my $output_path    = shift;
-  my $filter_type    = shift;
+  my $self        = shift;
+  my $output_path = shift;
+  my $filter_type = shift;
+  my $yomi_type   = shift;
 
-  my $src_path       = $self->{src_path};
+  my $src_path    = $self->{src_path};
   my $cnt = 0;
 
   # open files handlers
@@ -102,7 +106,7 @@ sub _create_base { # {{{5
       }
 
       # create line for update
-      my $text = $self->_create_line(\%parsed);
+      my $text = $self->_create_line(\%parsed, $yomi_type);
 
       # write
       print TO "$text\n";
@@ -315,12 +319,13 @@ sub _create_line { # {{{5
 
   my $self      = shift;
   my $parsed    = shift;
-  my $name      = $parsed->{'name'};
-  my $yomi      = $parsed->{'yomi'};
+  my $yomi_type = shift;
+  my $name      = $parsed->{'name'} || '';
+  my $yomi      = $parsed->{'yomi'} || '';
   my $converted = '';
 
   # yomi
-  $converted .= $yomi || $self->_convert_name_to_yomi($name);
+  $converted .= $self->_convert_yomi_string($yomi, $name, $yomi_type);
   $converted .= ' ';
 
   # flags
@@ -366,32 +371,99 @@ sub _create_flag_string { # {{{5
   # Kanji (Han)
   $flag[3] = ($name =~ /[〆ヵヶ\p{InCJKUnifiedIdeographs}]/) ? 1 : 0;
 
+  # Chouon
+  $flag[4] = ($name =~ /[ー]/) ? 1 : 0;
+
   return join('', @flag);
 } # }}}5
 
 # = =
+# create yomi string
+#
+# args
+# $yomi
+# $name
+sub _convert_yomi_string {
+
+  my $self      = shift;
+  my $yomi      = shift;
+  my $name      = shift;
+  my $yomi_type = shift;
+
+  # ready yomi source
+  # - if exists yomi param in the record, use it
+  # - else create yomi param from name param and use it
+  $yomi = (length($yomi) > 0)
+      ? $yomi
+      : $self->_convert_yomi_from_name($name);
+
+  # convert yomi from yomi_type
+  $yomi = $self->_convert_by_yomi_type($yomi, $yomi_type);
+
+  return $yomi;
+}
+
+# = =
 # convert name string to yomi string
-sub _convert_name_to_yomi { # {{{5
+sub _convert_yomi_from_name { # {{{5
 
   my $self   = shift;
   my $name   = shift;
 
+  my $result = $name;
+
   # convert
   # - old character
-  $name =~ tr/ゐゑヰヱ/いえイエ/;
+  $result =~ tr/ゐゑヰヱ/いえイエ/;
 
   # convert
   # - repeat mark
-  $name =~ s/(.)ゝ/$1$1/g;
+  $result =~ s/(.)ゝ/$1$1/g;
 
   # convert
   # - repeat mark (Dakuten)
-  if ($name =~ m/(.)ゞ/) {
-    my $tmp = chr(ord($1) + 1);
-    $name =~ s/(.)ゞ/$1$tmp/g;
+  if ($result =~ m/(.)ゞ/) {
+
+    # check range for character
+    if ($1 =~ /([か-こさ-そた-とは-ほカ-コサ-ソタ-トハ-ホ])/) {
+
+      # if normally character
+      # - modify to character code +1
+      my $tmp = chr(ord($1) + 1);
+      $result =~ s/(.)ゞ/$1$tmp/g;
+    }
+    elsif ($1 =~ /[うウ]/) {
+
+      # if ウ to ヴ
+      $result =~ s/(.)ゞ/$1ヴ/g;
+    }
   }
 
-  return $name;
+  return $result;
+} # }}}5
+
+sub _convert_by_yomi_type { # {{{5
+
+  my $self      = shift;
+  my $yomi      = shift;
+  my $yomi_type = shift;
+
+  # check flag
+  if (defined($yomi_type)) {
+
+    if($yomi_type == 0){
+
+      # katakana to hiragana
+      $yomi =~ tr/ァ-ン/ぁ-ん/;
+    }
+    else{
+
+      # hiragana to katakana
+      $yomi =~ tr/ぁ-ん/ァ-ン/;
+    }
+  }
+
+  return $yomi;
 } # }}}5
 
 # - - - - - - - - - - - - - - - - - - - - -
