@@ -14,7 +14,7 @@ use Encode;
 binmode(STDOUT, ':utf8');
 binmode(STDIN, ':utf8');
 
-our $VERSION = "1.01";
+our $VERSION = "1.1";
 
 # = =
 # initialize method
@@ -336,22 +336,52 @@ sub _init_query {
   }
 
   # flags
-  # - use as regex
-  $q->{'flags'} = '';
-  for my $idx (qw/flag_alnum flag_hiragana flag_katakana flag_kanji flag_chouon/){
+  $class->_init_query_flags($q);
+}
 
-    # check flag property
-    if(defined($q->{$idx}) && $q->{$idx} =~ m/^([01])$/){
+# = =
+# initialize query flags as regex string
+#
+# flag
+#   0 ... exclude character type
+#   1 ... include character type
+#   . ... any
+#
+# character type
+#   1xxxx ... include alnum
+#   x1xxx ... include Hiragana
+#   xx1xx ... include Katakana
+#   xxx1x ... include Kanji
+#   xxxx1 ... include Chouon
+sub _init_query_flags {
 
-      # if 0 or 1, add the number
-      $q->{'flags'} .= $1;
-    }
-    else{
+  my $class = shift;
+  my $q     = shift;
+  my $flags = $q->{'flags'} || '';
 
-      # if other, add the '.'
-      $q->{'flags'} .= '.';
+  if(length($flags) > 0){
+
+    $flags =~ s/[^01]/./g;
+    $flags  = substr("${flags}.....", 0, 5);
+  }
+  else{
+    for my $idx (qw/flag_alnum flag_hiragana flag_katakana flag_kanji flag_chouon/){
+
+      # check flag property
+      if(defined($q->{$idx}) && $q->{$idx} =~ m/^([01])$/){
+
+        # if 0 or 1, add the number
+        $flags .= $1;
+      }
+      else{
+
+        # if other, add the '.'
+        $flags .= '.';
+      }
     }
   }
+
+  $q->{'flags'} = $flags;
 }
 
 1;

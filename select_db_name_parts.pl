@@ -55,13 +55,9 @@ my $dbpath      = File::Spec->catfile($my_dir_path, 'db', $ARGV[0]);
 my $limit       = defined($ARGV[1]) ? $ARGV[1] : 1;
 my %query = (
 
-  limit         => $opts{'l'},
-  random        => $opts{'r'},
-  flag_alnum    => substr($opts{'f'}, 0, 1),
-  flag_hiragana => substr($opts{'f'}, 1, 1),
-  flag_katakana => substr($opts{'f'}, 2, 1),
-  flag_kanji    => substr($opts{'f'}, 3, 1),
-  flag_chouon   => substr($opts{'f'}, 4, 1),
+  limit  => $opts{'l'},
+  random => $opts{'r'},
+  flags  => $opts{'f'},
 );
 
 $query{'yomi_regex'} = $opts{'y'} if defined($opts{'y'});
