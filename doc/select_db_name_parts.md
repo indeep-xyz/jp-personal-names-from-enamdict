@@ -49,5 +49,25 @@ if no set normal selection, else random selection.
 
 #### -y
 
-regex string for yomi params
+regex string for yomi params.
+
+#### -Y
+
+flag for yomi compact.
+
+if set, compact the result string to one line by yomi param.
+
+example is in the following.
+
+```
+# no set
+NAME-A YOMI
+NAME-A YOMI
+NAME-A YOMI
+NAME-A YOMI
+NAME-A YOMI
+
+# set
+NAME-A YOMI|YOMI|YOMI|YOMI|YOMI
+```
 

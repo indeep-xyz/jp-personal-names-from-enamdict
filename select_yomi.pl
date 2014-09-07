@@ -8,10 +8,8 @@ use utf8;
 
 use File::Spec;
 use File::Basename qw(dirname);
-use lib File::Spec->catfile(dirname(__FILE__), 'lib');
 
 use Getopt::Std;
-use DB::ENAMEDICT::Select;
 
 use Data::Dumper;
 
@@ -22,10 +20,13 @@ binmode(STDIN,  ':utf8');
 # guard
 
 # require @ARGV
-if (@ARGV < 1) {
+if (@ARGV < 2) {
 
   die <<'EOT'
-require [options] $1 (database name)
+require [options] $1 $2
+
+$1 ... name
+$2 ... database name
 EOT
 }
 
@@ -36,34 +37,23 @@ my %opts = ();
 
 # getopts
 # - f ... database flags ([.01]{5})
-# - l ... limit
-# - n ... name regex
-# - y ... yomi regex
-# - r ... random flag
-# - Y ... yomi compact flag
-getopts ("f:l:n:y:rY", \%opts);
+getopts ("f:", \%opts);
 
 # initialize
 $opts{'f'} ||= '.....';
-$opts{'l'} ||= 1;
-$opts{'r'} ||= 0;
-$opts{'Y'} ||= 0;
 
 # - - - - - - - - - - - - - - - - - - -
 # main
 
 my $my_dir_path = dirname(__FILE__);
-my $dbpath      = File::Spec->catfile($my_dir_path, 'db', $ARGV[0]);
-my $limit       = defined($ARGV[1]) ? $ARGV[1] : 1;
+my $name        = $ARGV[0];
+my $dbname      = $ARGV[1];
 my %query = (
 
-  flags        => $opts{'f'},
-  limit        => $opts{'l'},
-  random       => $opts{'r'},
-  yomi_compact => $opts{'Y'},
+  limit  => 5000,
+  flags  => $opts{'f'},
 );
 
-$query{'yomi_regex'} = $opts{'y'} if defined($opts{'y'});
 $query{'name_regex'} = $opts{'n'} if defined($opts{'n'});
 
 # run

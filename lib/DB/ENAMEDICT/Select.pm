@@ -50,6 +50,12 @@ sub select {
       ? $class->_select_normal($dbpath, $q)
       : $class->_select_random($dbpath, $q);
 
+  # yomi compact
+  if ($q->{'yomi_compact'} == 1){
+
+    $result = $class->_apply_yomi_compact($result);
+  }
+
   # result
   return $result;
 }
@@ -66,7 +72,7 @@ sub _select_normal{
 
   my $limit   = $q->{'limit'};
   my $records = $class->_load_database($dbpath, $q);
-  my @ret     = splice(@$records, 1, $limit);
+  my @ret     = (@$records > 0) ? splice(@$records, 1, $limit) : ();
 
   return \@ret;
 }
@@ -279,6 +285,41 @@ sub _regex_wrapper { # {{{5
 # - - - - - - - - - - - - - - - - - - - - -
 # other
 
+sub _apply_yomi_compact { # {{{5
+
+  my $class        = shift;
+  my $result_src   = shift;
+  my %temp         = ();
+  my @result       = ();
+
+  # compact to yomi
+  foreach my $record (@$result_src){
+
+    my @recArray = split(/ /, $record);
+
+    # check keys of name string
+    if (exists $temp{$recArray[0]}){
+
+      # if exists, join string as suffix
+      $temp{$recArray[0]} .= "|${recArray[1]}";
+    }
+    else{
+
+      # if not exists, create
+      $temp{$recArray[0]} = $recArray[1];
+    }
+  }
+
+  # remake result
+  # - [ [NAME YOMI], ... ]
+  foreach my $name (keys(%temp)){
+
+    push(@result, "$name ${temp{$name}}");
+  }
+
+  return \@result;
+} # }}}5
+
 # = =
 # check arguments for `select` (public method)
 #
@@ -316,8 +357,8 @@ sub _init_query {
   my $q     = shift;
   my $ret;
 
-  # random
-  $q->{'random'} = ($q->{'random'}) ? 1 : 0;
+  # flags
+  $class->_init_query_flags($q);
 
   # limit
   if (!defined($q->{'limit'})
@@ -325,6 +366,12 @@ sub _init_query {
 
     $q->{'limit'} = ($q->{'random'}) ? 1 : 0;
   }
+
+  # random
+  $q->{'random'} = ($q->{'random'}) ? 1 : 0;
+
+  # yomi compact
+  $q->{'yomi_compact'} = ($q->{'yomi_compact'}) ? 1 : 0;
 
   # texts
   # - follow in the qw/.../
@@ -334,9 +381,6 @@ sub _init_query {
       $q->{$idx} = Encode::decode('utf8', $q->{$idx});
     }
   }
-
-  # flags
-  $class->_init_query_flags($q);
 }
 
 # = =
