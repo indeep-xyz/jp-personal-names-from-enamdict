@@ -1,12 +1,12 @@
-DB::ENAMEDICT::Convert
+DB::ENAMDICT::Convert
 ====
 
 ## USAGE
 
 ```
-use DB::ENAMEDICT::Convert;
+use DB::ENAMDICT::Convert;
 
-my $conv = DB::ENAMEDICT::Convert->new({SourcePath});
+my $conv = DB::ENAMDICT::Convert->new({SourcePath});
 $conv->convert(
   {DatabasePath},
   \[{FilterType}],
@@ -18,7 +18,7 @@ structure of the output database is written to _doc/data_structure/name_parts.md
 
 ### SourcePath
 
-file path for the ENAMEDICT format file was encoded _UTF-8_.
+file path for the ENAMDICT format file was encoded _UTF-8_.
 
 if not exists, run to `./setup_src.sh`.
 

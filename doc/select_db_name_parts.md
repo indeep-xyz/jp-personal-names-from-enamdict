@@ -1,7 +1,7 @@
 select_db_name_parts.pl
 ====
 
-wrapper for _DB::ENAMEDICT::Select_ .
+wrapper for _DB::ENAMDICT::Select_ .
 
 ## USAGE
 

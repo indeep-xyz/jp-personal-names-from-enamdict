@@ -7,8 +7,8 @@ R_ARC="http://ftp.monash.edu.au/pub/nihongo/enamdict.gz"
 MY_DIR="`readlink -f "$0" | sed 's!/[^/]*$!!'`"
 
 L_DIR="$MY_DIR/src"
-L_ARC="$L_DIR/enamedict.gz"
-L_UTF8="$L_DIR/enamedict.utf8.txt"
+L_ARC="$L_DIR/enamdict.gz"
+L_UTF8="$L_DIR/enamdict.utf8.txt"
 
 # - - - - - - - - - - - - - - - - - - - - - - -
 # main

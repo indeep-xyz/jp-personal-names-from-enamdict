@@ -8,8 +8,10 @@ use utf8;
 
 use File::Spec;
 use File::Basename qw(dirname);
+use lib File::Spec->catfile(dirname(__FILE__), 'lib');
 
 use Getopt::Std;
+use DB::ENAMDICT::Select;
 
 use Data::Dumper;
 
@@ -47,7 +49,7 @@ $opts{'f'} ||= '.....';
 
 my $my_dir_path = dirname(__FILE__);
 my $name        = $ARGV[0];
-my $dbname      = $ARGV[1];
+my $dbpath      = File::Spec->catfile($my_dir_path, 'db', $ARGV[1]);
 my %query = (
 
   limit  => 5000,
@@ -57,7 +59,7 @@ my %query = (
 $query{'name_regex'} = $opts{'n'} if defined($opts{'n'});
 
 # run
-my $result = DB::ENAMEDICT::Select->select($dbpath, \%query);
+my $result = DB::ENAMDICT::Select->select($dbpath, \%query);
 
 # print $result
 for (my $i = 0; $i < scalar(@$result); $i++) {

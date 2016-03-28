@@ -11,7 +11,7 @@ use File::Basename qw(dirname);
 use lib File::Spec->catfile(dirname(__FILE__), 'lib');
 
 use Getopt::Std;
-use DB::ENAMEDICT::Select;
+use DB::ENAMDICT::Select;
 
 use Data::Dumper;
 
@@ -67,7 +67,7 @@ $query{'yomi_regex'} = $opts{'y'} if defined($opts{'y'});
 $query{'name_regex'} = $opts{'n'} if defined($opts{'n'});
 
 # run
-my $result = DB::ENAMEDICT::Select->select($dbpath, \%query);
+my $result = DB::ENAMDICT::Select->select($dbpath, \%query);
 
 # print $result
 for (my $i = 0; $i < scalar(@$result); $i++) {

@@ -1,6 +1,6 @@
 # *-* encoding: utf8 *-*
 
-package DB::ENAMEDICT::Convert;
+package DB::ENAMDICT::Convert;
 
 use 5.0080001;
 use strict;

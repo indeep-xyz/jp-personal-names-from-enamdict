@@ -1,12 +1,12 @@
-DB::ENAMEDICT::Select
+DB::ENAMDICT::Select
 ====
 
 ## USAGE
 
 ```
-use DB::ENAMEDICT::Select;
+use DB::ENAMDICT::Select;
 
-my ${returner} = use DB::ENAMEDICT::Select->select(
+my ${returner} = use DB::ENAMDICT::Select->select(
   {DatabasePath},
   \{
     limit         => {Limit},

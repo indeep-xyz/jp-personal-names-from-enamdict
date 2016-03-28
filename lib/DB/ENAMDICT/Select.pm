@@ -1,6 +1,6 @@
 # *-* encoding: utf8 *-*
 
-package DB::ENAMEDICT::Select;
+package DB::ENAMDICT::Select;
 
 use 5.0080001;
 use strict;
@@ -324,7 +324,7 @@ sub _apply_yomi_compact { # {{{5
 # check arguments for `select` (public method)
 #
 # returner
-# 1 ... 
+# 1 ...
 # 0 ... flag
 sub _init_select_arguments { # {{{5
 

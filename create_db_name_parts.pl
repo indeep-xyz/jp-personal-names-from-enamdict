@@ -9,15 +9,15 @@ use File::Spec;
 use File::Basename qw(dirname);
 use lib File::Spec->catfile(dirname(__FILE__), 'lib');
 
-use DB::ENAMEDICT::Convert;
+use DB::ENAMDICT::Convert;
 
 # - - - - - - - - - - - - - - - - - - -
 # main
 
 my $my_dir_path = dirname(__FILE__);
-my $src_path    = File::Spec->catfile($my_dir_path, 'src', 'enamedict.utf8.txt');
+my $src_path    = File::Spec->catfile($my_dir_path, 'src', 'enamdict.utf8.txt');
 
-my $conv = DB::ENAMEDICT::Convert->new(
+my $conv = DB::ENAMDICT::Convert->new(
   src_path    => $src_path,
   );
 
