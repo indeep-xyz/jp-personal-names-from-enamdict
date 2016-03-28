@@ -1,5 +1,6 @@
 # temporary file that made by this script
-/db/*.~*
+/db/*
+!/db/.gitkeep
 
 # source file
 /src
